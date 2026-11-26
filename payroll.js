@@ -49,7 +49,8 @@
  function renderRateEditor(){const el=$('payrollRateEditor');if(!el)return;el.innerHTML=MONEY.map((m,i)=>`<label class="payroll-rate-row">${m[0]}<input type="number" min="0" step="0.01" data-rate-index="${i}" value="${P().moneyRates[m[0]]}"></label>`).join('')}
  renderRateEditor();if($('generatePayrollReportBtn'))$('generatePayrollReportBtn').textContent='Generar informe';
  function renderManualList(){const p=displayPeriod(),items=manualItems(p);showItems($('manualPayrollItems'),items,id=>{P().manualItems=P().manualItems.filter(x=>x.id!==id);saveState();renderManualList();renderSummary()})}
- $('monthlyCloseBtn')?.addEventListener('click',open);
+ // Robust delegated capture handler: protects the home navigation button from other click handlers.
+ document.addEventListener('click',e=>{const b=e.target.closest?.('#monthlyCloseBtn');if(!b)return;e.preventDefault();e.stopImmediatePropagation();try{open()}catch(err){console.error('Error al abrir Cierre del mes',err);toast('No se pudo abrir Cierre del mes. Revisa los datos y vuelve a intentarlo.')}},true);
  options($('finishPayrollSelect'),true);options($('manualPayrollSelect'),false);
  const toggleCount=(sel,inp)=>{if(!sel||!inp)return;const on=sel.value==='m8',w=inp.closest('label')||inp;w.style.display=on?'':'none';if(!on)inp.value=''};
  [['finishPayrollSelect','finishPayrollCount','addFinishPayrollItem','finishForm'],['manualPayrollSelect','manualPayrollCount','addManualPayrollItem',null]].forEach(([s,c,ad,f])=>{const S=$(s),C=$(c),upd=()=>toggleCount(S,C);S?.addEventListener('change',upd);$(ad)?.addEventListener('click',()=>setTimeout(upd,0));if(f)$(f)?.addEventListener('reset',()=>setTimeout(upd,0));upd()});
